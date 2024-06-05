@@ -3,7 +3,7 @@ from db import get_db_connection
 
 app = Flask(__name__)
 
-#1 View: Books Details Query
+#1 Views: Books Details 
 @app.route('/books/details', methods=['GET'])
 def get_books_details():
     conn = get_db_connection()
@@ -15,7 +15,7 @@ def get_books_details():
     
     return jsonify(books)
 
-#2 View: Customer Reviews
+#2 Views: Customer Reviews
 @app.route('/review', methods=['GET'])
 def cs_review():
     conn = get_db_connection()
@@ -26,7 +26,7 @@ def cs_review():
     conn.close()
     return jsonify(review)
 
-#3 View: cs_wishlist
+#3 Views: cs_wishlist
 @app.route('/wishlist', methods = ['GET'])
 def wishlist ():
     conn = get_db_connection()
@@ -41,7 +41,7 @@ def wishlist ():
 @app.route('/books', methods=['GET'])
 def get_books():
     # Mendapatkan parameter ID buku dari query string
-    book_id = request.args.get('id')
+    book_id = request.args.get('book_id')
     author_id = request.args.get('author_id')
 
     try:
@@ -64,56 +64,8 @@ def get_books():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# 5. DML: INSERT Wishlist Query
-# @app.route('/add_author', methods=['POST'])
-# def add_author():
-#     if request.content_type != 'application/json':
-#         return jsonify({'error': 'Content-Type must be application/json'}), 415
-    
-#     data = request.json
-#     required_fields = ["book_id", "title", "author_id", "publisher_id", "category_id", "language_id", "printing_id", "publication_year", "stock", "synopsis", "page"]
-    
-#     if not all(field in data for field in required_fields):
-#         return jsonify({'error': 'All fields are required'}), 400
-    
-#     book_id = data['book_id']
-#     title = data['title']
-#     author_id = data['author_id']
-#     publisher_id = data['publisher_id']
-#     category_id = data['category_id']
-#     language_id = data['language_id']
-#     printing_id = data['printing_id']
-#     publication_year = data['publication_year']
-#     stock = data['stock']
-#     synopsis = data['synopsis']
-#     page = data['page']
-    
-#     query = '''
-#         INSERT INTO "GRB"."Book"(
-#             book_id, title, author_id, publisher_id, category_id, language_id, printing_id, publication_year, stock, synopsis, page
-#         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-#     '''
-    
-#     conn = get_db_connection()
-#     cursor = conn.cursor()
-    
-#     try:
-#         cursor.execute(query, (book_id, title, author_id, publisher_id, category_id, language_id, printing_id, publication_year, stock, synopsis, page))
-#         conn.commit()
-#         response = {'status': 'success'}
-#         status_code = 200
-#     except Exception as e:
-#         conn.rollback()
-#         response = {'status': 'error', 'message': str(e)}
-#         status_code = 400
-#     finally:
-#         cursor.close()
-#         conn.close()
-    
-#     return jsonify(response), status_code
 
-
-#6. DML: INSERT Book Query
+#6. INSERT Book Query
 @app.route('/add_book', methods=['POST'])
 def add_book():
     if request.content_type != 'application/json':
@@ -163,9 +115,7 @@ def add_book():
 
 
 
-#7. DML: UPDATE Query
-
-# General Update Function
+#7. Update Table General
 @app.route('/update', methods=['PUT'])
 def update_table():
     if request.headers.get('Content-Type') != 'application/json':
@@ -202,10 +152,9 @@ def update_table():
     
     return jsonify(response), status_code
 
-#8. Select General
+#8. Select Table General
 @app.route('/query', methods=['GET'])
 def query_table():
-    # Mendapatkan nama tabel dari query string
     table_name = request.args.get('table')
     id = request.args.get('id')
 
@@ -218,13 +167,14 @@ def query_table():
         cursor = conn.cursor()
 
         # Eksekusi query SQL
-        cursor.execute(f"SELECT * FROM {table_name} order by {id} ")
+        if id:
+            cursor.execute(f"SELECT * FROM {table_name} order by {id} ")
+        else:
+            cursor.execute(f"select * from {table_name}")
 
         # Mengambil semua baris hasil query
         rows = cursor.fetchall()
 
-        # Mengonversi hasil ke dalam format JSON
-        # result = [{'id': row[0], 'name': row[1]} for row in rows]  # Misalnya, ubah sesuai dengan struktur tabel Anda
 
         # Menutup koneksi database
         conn.close()
@@ -284,35 +234,6 @@ def delete_customers():
         conn.rollback()
         return jsonify({"error": str(e)}), 500
     
-#10. TCL: Combine Several SQL Statements
-@app.route('/execute_transaction', methods=['POST'])
-def execute_transaction():
-    data = request.json
-    queries = data.get('queries')
-    
-    if not queries:
-        return jsonify({'error': 'Queries are required'}), 400
-    
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    try:
-        for query in queries:
-            cursor.execute(query)
-        conn.commit()
-        response = {'status': 'success'}
-        status_code = 200
-    except Exception as e:
-        conn.rollback()
-        response = {'status': 'error', 'message': str(e)}
-        status_code = 400
-    finally:
-        cursor.close()
-        conn.close()
-    
-    return jsonify(response), status_code
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)

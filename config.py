@@ -1,4 +1,3 @@
-# config.py
 import getpass
 
 DATABASE = {
@@ -8,12 +7,3 @@ DATABASE = {
     'host': 'localhost',
     'port': 5432
 }
-
-
-# DATABASE = {
-#     'dbname': 'GRB_DB',
-#     'user': 'postgres',
-#     'password': 'alter',
-#     'host': 'localhost',
-#     'port': 5432
-# }
