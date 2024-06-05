@@ -6,6 +6,7 @@ def get_db_connection():
         dbname=DATABASE['dbname'],
         user=DATABASE['user'],
         password=DATABASE['password'],
-        host=DATABASE['host']
+        host=DATABASE['host'],
+        port=DATABASE['port']
     )
     return conn

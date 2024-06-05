@@ -1,6 +1,7 @@
 DATABASE = {
-    'dbname': 'bookstore',
-    'user': 'your_username',
-    'password': 'your_password',
-    'host': 'localhost'
+    'dbname': 'GRB_DB',
+    'user': 'postgres',
+    'password': 'alter',
+    'host': 'localhost',
+    'port': 5432
 }
