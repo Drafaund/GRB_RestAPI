@@ -155,6 +155,7 @@ def update_table():
 #8. Select Table General
 @app.route('/query', methods=['GET'])
 def query_table():
+   
     table_name = request.args.get('table')
     id = request.args.get('id')
 
@@ -195,22 +196,23 @@ def delete_customers():
         conn = get_db_connection()
         cur = conn.cursor()
 
-        if customer_id:
+        if status:
             # Memeriksa status akun customer tertentu
-            cur.execute(f"""
-                SELECT ca.status FROM "GRB"."Customer" c
+            cur.execute("""
+                SELECT c.customer_id
+                FROM "GRB"."Customer" c 
                 JOIN "GRB"."Customer_Account" ca ON c.account_id = ca.account_id
-                WHERE c.customer_id = {customer_id}
-            """)
-            
+                WHERE ca.status = %s
+            """, (status,))
+        
             account_status = cur.fetchone()
 
-            if account_status and account_status[0] == status:
-                # Menghapus customer jika statusnya sesuai
-                cur.execute(f"""
+            if customer_id:
+        
+                cur.execute("""
                     DELETE FROM "GRB"."Customer"
-                    WHERE customer_id = {customer_id}
-                """)
+                    WHERE "customer_id" = %s
+                """, (customer_id,))
                 conn.commit()
                 cur.close()
                 return jsonify({"message": "Customer deleted successfully"}), 200
@@ -219,16 +221,21 @@ def delete_customers():
                 cur.close()
                 return jsonify({"error": "Customer does not have the specified status or does not exist"}), 400
         else:
-            # Menghapus semua customer dengan status tertentu
-            cur.execute(f"""
-                DELETE FROM "GRB"."Customer" c
-                USING "GRB"."Customer_Account" ca
-                WHERE c.account_id = ca.account_id AND ca.status = '{status}'
-            """)
+        # Menghapus semua customer dengan status tertentu
+            cur.execute("""
+                DELETE FROM "GRB"."Customer"
+                WHERE "customer_id" IN (
+                    SELECT c.customer_id
+                    FROM "GRB"."Customer" c
+                    JOIN "GRB"."Customer_Account" ca ON c.account_id = ca.account_id
+                    WHERE ca.status = %s
+                )
+            """, (status,))
             deleted_rows = cur.rowcount
             conn.commit()
             cur.close()
             return jsonify({"message": f"{deleted_rows} customers deleted successfully"}), 200
+
 
     except Exception as e:
         conn.rollback()
