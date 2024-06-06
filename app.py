@@ -65,7 +65,7 @@ def get_books():
         return jsonify({'error': str(e)}), 500
 
 
-#6. INSERT Book Query
+#5. INSERT Book Query
 @app.route('/add_book', methods=['POST'])
 def add_book():
     if request.content_type != 'application/json':
@@ -115,7 +115,7 @@ def add_book():
 
 
 
-#7. Update Table General
+#6. Update Table General
 @app.route('/update', methods=['PUT'])
 def update_table():
     if request.headers.get('Content-Type') != 'application/json':
@@ -152,7 +152,7 @@ def update_table():
     
     return jsonify(response), status_code
 
-#8. Select Table General
+#7. Select Table General
 @app.route('/query', methods=['GET'])
 def query_table():
    
@@ -185,7 +185,12 @@ def query_table():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-#10. Customer Delete
+#8. Customer Delete
+"""
+    Dalam database sudah ditambahkan ON DELETE CASCADE dan Trigger 
+    sehingga apabila customer_id terhapus row dari tabel yang menyertainya 
+    dan terhubung dengannya akan terhapus juga
+"""
 @app.route('/customers/delete', methods=['DELETE'])
 def delete_customers():
     customer_id = request.args.get('customer_id')
